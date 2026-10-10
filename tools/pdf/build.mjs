@@ -7,6 +7,7 @@ import { writeFileSync, mkdirSync, statSync } from 'node:fs';
 import { resolve, dirname, posix, basename } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { ROOT, REPO, SITE, TITLE, read, readBook, gitCommit, buildStamp, stripBackLink } from '../lib/book.mjs';
+import { splitLongItems } from '../lib/split-items.mjs';
 
 const OUT = resolve(ROOT, process.argv[2] ?? 'dist/HowToLiveBetter.pdf');
 const WORK = resolve(ROOT, 'dist/pdf-build.md');
@@ -25,7 +26,7 @@ docFiles.forEach((f, i) => anchorOf.set(f, `doc-${i + 1}`));
 const pages = [
   { src: 'README.md', md: `# 前言\n\n${description}\n\n${frontMd}`, anchor: 'front' },
   { src: 'README.md', md: contentsMd.replace(/^## 目录/, '# 各节简介'), anchor: 'contents' },
-  ...[...bookFiles, ...docFiles].map(src => ({ src, md: stripBackLink(read(src)), anchor: anchorOf.get(src) })),
+  ...[...bookFiles, ...docFiles].map(src => ({ src, md: splitLongItems(stripBackLink(read(src))), anchor: anchorOf.get(src) })),
   { src: 'README.md', md: aboutMd(), anchor: 'about' },
 ];
 
@@ -41,7 +42,7 @@ ${commitLine}- 最新版下载、在线检索、提意见：${REPO}
 
 正文里指向书内其他节的链接已改成书内跳转；指向核实记录、许可证这类没排进书的文件的链接改成了 GitHub 网址。
 
-全书以 Unlicense 发布，属于公有领域，可以随意复制、修改、分发。`;
+正文以 CC BY 4.0 发布（https://creativecommons.org/licenses/by/4.0/）。可以转载、改编、商用，要写明出处「高性价比人生指南」并附仓库链接，改过内容的要注明改过。`;
 }
 
 // ---------- 链接：书内的改成锚点，书外的改成绝对网址 ----------
